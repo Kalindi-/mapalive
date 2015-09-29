@@ -1,0 +1,24 @@
+/* html,body { height: 100%; margin: 0; padding: 0; } */
+
+.search {
+	margin: 10px;
+	width: 50%;
+}
+
+#map {
+	height: 400px;
+	width: 800px;
+	margin: 10px;
+}
+
+input {
+	width: 95%;
+}
+
+.together {
+	display: flex;
+}
+
+li {
+	list-style-type: none;
+}
