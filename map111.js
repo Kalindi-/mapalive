@@ -36,6 +36,12 @@ var Place = function(data) {
             position: this.latlng,
             title: this.name
             });
+    this.infowindow = new google.maps.InfoWindow({
+            content: this.name
+        });
+
+
+
 }
 
 var map;
@@ -59,7 +65,6 @@ var ViewModel = function() {
     this.locationsArray = ko.observableArray([]);
     locations.forEach(function(place){
         self.locationsArray.push( new Place(place))
-
     });
 
     self.userInput =  ko.observable('');
@@ -72,36 +77,22 @@ var ViewModel = function() {
         locationsArray().forEach(function(place) {
             if (place.name.indexOf(search) > -1) {
                 self.visibleLocations.push(place);
-                addMarker(place);
-
+                place.marker.setMap(map);
             }
-
+            else if (place.name.indexOf(search) === -1) {
+                place.marker.setMap(null);
+            }
         });
     }
     self.availableLocations();
-
-
 }
 
-
-
-
-function addMarker(location) {
-
-    locationsLength = availableLocations.length
-    location.marker.setMap(map);
-    var infowindow = new google.maps.InfoWindow({
-            content: location.name
-        });
-    google.maps.event.addListener(location.marker, 'click', function(content) {
-        return function(){
-            infowindow.setContent(content);
-            infowindow.open(map,this);
-        }
-    }(location.name));
-
-
-}
+// google.maps.event.addListener(marker, 'click', function(content) {
+//             return function(){
+//                 infowindow.setContent(content);
+//                 infowindow.open(map,this);
+//             }
+//         }(name));
 
 
 ko.applyBindings(ViewModel());
