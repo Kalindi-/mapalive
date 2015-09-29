@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <link rel="stylesheet" href="map111.css">
+    <link rel="stylesheet" href="map111.css">
+    <script src="http://knockoutjs.com/downloads/knockout-3.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
   </head>
   <body>
     <div class="together">
@@ -9,17 +11,16 @@
       </div>
       <div class="search">
         <form action="#">
-          <input placeholder="Search" type="search" autocomplete="off">
-        </form>
-        <p data-bind="text: places.length"></p>
-        <ul data-bind="foreach: places">
-          <li data-bind="text: places"></li>
+          <input placeholder="Search..." type="search" name="q" data-bind="value: userInput, textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
+        <ul data-bind="foreach: visibleLocations">
+          <li data-bind="text: name"></li>
         </ul>
       </div>
     </div>
-    <script src="http://knockoutjs.com/downloads/knockout-1.2.1.js"></script>
+
+
+
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM"></script>
     <script src="map111.js"> </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM&callback=initMap">
-    </script>
   </body>
 </html>

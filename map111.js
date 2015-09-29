@@ -1,91 +1,110 @@
 
-var locations =   [
-    {
-        name : "savudrija, croatia",
-        "coordinates" : [45.50, 13.504, "savudrija, croatia"]
-    },{
-        name : "seca, slovenia",
-        "coordinates" : [45.486138, 13.626889, "seca, slovenia"]
-    },{
-        name : "soline, slovenija",
-        "coordinates" : [45.490521, 13.601933, "soline, slovenija"]
-    },{
-        name : "piran, slovenija",
-        "coordinates" : [45.530337, 13.562947, "piran, slovenija"]
-    },{
-        name : "strunjan, slovenija",
-        "coordinates" : [45.528669, 13.608685, "strunjanske soline, slovenija"]
-    },{
-        name : "belvedere, slovenija",
-        "coordinates" : [45.537589, 13.618552, "belvedere, slovenija"]
-    },{
-        name : "debeli rtic, slovenija",
-        "coordinates" : [45.5904856, 13.7021026, "debeli rtic, slovenija"]
-    },{
-        name : "soline strunjan, slovenija",
-        "coordinates" : [45.527949, 13.593080, "strunjan, slovenija"]
-    },{
-        name : "dragonja, slovenija",
-        "coordinates" : [45.451040, 13.692053, "dragonja, slovenija"]
-    }
-];
+var locations = [{
+            name : "savudrija, croatia",
+            coordinates : [45.50, 13.504]
+        },{
+            name : "seca, slovenia",
+            coordinates : [45.486138, 13.626889]
+        },{
+            name : "soline, slovenija",
+            coordinates : [45.490521, 13.601933]
+        },{
+            name : "piran, slovenija",
+            coordinates : [45.530337, 13.562947]
+        },{
+            name : "strunjan, slovenija",
+            coordinates : [45.528669, 13.608685]
+        },{
+            name : "belvedere, slovenija",
+            coordinates : [45.537589, 13.618552]
+        },{
+            name : "debeli rtic, slovenija",
+            coordinates : [45.5904856, 13.7021026]
+        },{
+            name : "soline strunjan, slovenija",
+            coordinates : [45.527949, 13.593080]
+        },{
+            name : "dragonja, slovenija",
+            coordinates : [45.451040, 13.692053]
+        }]
 
+var Place = function(data) {
+    this.name = data.name;
+    this.coordinates = data.coordinates;
+    this.latlng = new google.maps.LatLng(this.coordinates[0], this.coordinates[1]);
+    this.marker = new google.maps.Marker({
+            position: this.latlng,
+            title: this.name
+            });
+}
 
 var map;
 function initMap() {
-	map = new google.maps.Map(document.getElementById('map'), {
-		mapTypeId: google.maps.MapTypeId.HYBRID
-	});
-	addMarkers();
+    map = new google.maps.Map(document.getElementById('map'), {
+        mapTypeId: google.maps.MapTypeId.HYBRID
+    });
+    var bounds = new google.maps.LatLngBounds();
+    locations.forEach(function(location) {
+        var latlngBound = new google.maps.LatLng(location.coordinates[0], location.coordinates[1]);
+        bounds.extend(latlngBound);
+    })
+    map.fitBounds(bounds);
 }
+initMap();
 
-function addMarkers() {
-	var bounds = new google.maps.LatLngBounds();
-	locationsLength = locations.length
-	for (var loc = 0; loc < locationsLength; loc++) {
-		var latlng = new google.maps.LatLng(locations[loc].coordinates[0], locations[loc].coordinates[1]);
-		var marker = new google.maps.Marker({
-    		position: latlng,
-    		title: locations[loc].coordinates[2]
-			});
-		marker.setMap(map);
+var ViewModel = function() {
 
-		var infowindow = new google.maps.InfoWindow({
-    		content: locations[loc].coordinates[2]
-  		});
-		google.maps.event.addListener(marker, 'click', function(content) {
-    		return function(){
-        		infowindow.setContent(content);//set the content
-        		infowindow.open(map,this);
-    		}
-    	}(locations[loc].coordinates[2]));
-
-		bounds.extend(latlng);
-		map.fitBounds(bounds);
-	}
-}
-
-
-function newPlace(name, coordinates) {
     var self = this;
-    self.name = name;
-    self.coordinates = coordinates;
+
+    this.locationsArray = ko.observableArray([]);
+    locations.forEach(function(place){
+        self.locationsArray.push( new Place(place))
+
+    });
+
+    self.userInput =  ko.observable('');
+    self.visibleLocations = ko.observableArray();
+    initMap(self.visibleLocations());
+
+    self.availableLocations = function () {
+        self.visibleLocations.removeAll()
+        var search = self.userInput().toLowerCase();
+        locationsArray().forEach(function(place) {
+            if (place.name.indexOf(search) > -1) {
+                self.visibleLocations.push(place);
+                addMarker(place);
+
+            }
+
+        });
+    }
+    self.availableLocations();
+
 
 }
 
 
-function MakePlaces() {
-    var self = this;
-    self.places = ko.observableArray([]);
 
-    locationsLength = locations.length;
-    for (var loc = 0; loc < locationsLength; loc++) {
-		var place = new newPlace(locations[loc].name, locations[loc].coordinates);
-		self.places.push(place)
-	}
+
+function addMarker(location) {
+
+    locationsLength = availableLocations.length
+    location.marker.setMap(map);
+    var infowindow = new google.maps.InfoWindow({
+            content: location.name
+        });
+    google.maps.event.addListener(location.marker, 'click', function(content) {
+        return function(){
+            infowindow.setContent(content);
+            infowindow.open(map,this);
+        }
+    }(location.name));
+
+
 }
 
-ko.applyBindings(new MakePlaces());
+
+ko.applyBindings(ViewModel());
 
 
 
@@ -93,4 +112,4 @@ ko.applyBindings(new MakePlaces());
 // http://stackoverflow.com/a/9525939
 // http://stackoverflow.com/a/7819972
 // http://stackoverflow.com/a/1505218
-// <input value="Search" onfocus="if (this.value=='Search') this.value='';">
+// http://jsfiddle.net/mythical/XJEzc/
