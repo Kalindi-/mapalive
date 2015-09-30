@@ -28,21 +28,6 @@ var locations = [{
             coordinates : [45.451040, 13.692053]
         }]
 
-var Place = function(data) {
-    this.name = data.name;
-    this.coordinates = data.coordinates;
-    this.latlng = new google.maps.LatLng(this.coordinates[0], this.coordinates[1]);
-    this.marker = new google.maps.Marker({
-            position: this.latlng,
-            title: this.name
-            });
-    this.infowindow = new google.maps.InfoWindow({
-            content: this.name
-        });
-
-
-
-}
 
 var map;
 function initMap() {
@@ -58,18 +43,31 @@ function initMap() {
 }
 initMap();
 
-var ViewModel = function() {
 
+var Place = function(data) {
+    this.name = data.name;
+    this.coordinates = data.coordinates;
+    this.latlng = new google.maps.LatLng(this.coordinates[0], this.coordinates[1]);
+    this.marker = new google.maps.Marker({
+        position: this.latlng,
+        title: this.name
+    });
+}
+
+
+var locationsToUse;
+
+var ViewModel = function() {
     var self = this;
 
     this.locationsArray = ko.observableArray([]);
+
     locations.forEach(function(place){
         self.locationsArray.push( new Place(place))
     });
 
     self.userInput =  ko.observable('');
     self.visibleLocations = ko.observableArray();
-    initMap(self.visibleLocations());
 
     self.availableLocations = function () {
         self.visibleLocations.removeAll()
@@ -83,19 +81,30 @@ var ViewModel = function() {
                 place.marker.setMap(null);
             }
         });
+        return visibleLocations();
     }
-    self.availableLocations();
+    locationsToUse = self.availableLocations();
 }
 
-// google.maps.event.addListener(marker, 'click', function(content) {
-//             return function(){
-//                 infowindow.setContent(content);
-//                 infowindow.open(map,this);
-//             }
-//         }(name));
-
-
 ko.applyBindings(ViewModel());
+
+
+var infoWindow = new google.maps.InfoWindow({})
+// how can I access the visibleLocations?
+var makeInfoWindow = function() {
+    locationsToUse.forEach(function(place) {
+        google.maps.event.addListener(place.marker, 'click', function(content) {
+            return function() {
+                infoWindow.setContent(content);
+                infoWindow.open(map,this);
+            }
+        }(place.name))
+    });
+}
+
+makeInfoWindow();
+
+
 
 
 
