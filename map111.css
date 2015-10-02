@@ -1,24 +1,89 @@
-/* html,body { height: 100%; margin: 0; padding: 0; } */
-
-.search {
-	margin: 10px;
-	width: 50%;
+body {
+	background-color:  black;
 }
 
 #map {
-	height: 400px;
-	width: 800px;
-	margin: 10px;
+	position: fixed !important;
+	top: 5px;
+	right: 5px;
+	bottom: 190px;
+	left: 5px;
+}
+
+.refresh {
+	margin: 1px;
+	width: 120px;
+	padding-right: 4px;
+	font-size: 18px;
+	text-shadow: #000 0px 0px 1px;
 }
 
 input {
-	width: 95%;
+	width: 98%;
+	/*height: 100px; /** TODO enlarge */
 }
 
-.together {
+.search {
 	display: flex;
+	margin-bottom: -4px; /* infowindow hides behind search TODO fix*/*/
+}
+
+.search,
+li {
+	position: relative;
+	z-index: 1;
+	color: white;
+	font-weight: bolder;
 }
 
 li {
 	list-style-type: none;
+	margin: 8px 0 8px -30px;
+	font-size: 18px;
+    text-shadow: #000 0px 0px 1px, #000 0px 0px 1px, #000 0px 0px 1px,
+             #000 0px 0px 1px, #000 0px 0px 1px;
+    -webkit-font-smoothing: antialiased;
+    width: 1%;
+    white-space: nowrap;
+}
+
+img {
+	border: 3px solid black;
+	margin: 0 -1px;
+	height: 164px;
+}
+
+.scroll {
+	overflow-x: scroll;
+	position: absolute;
+	width: 99%;
+	bottom: 0;
+	left: 3px;
+}
+
+#images {
+	white-space: nowrap;
+}
+
+
+
+
+
+
+
+@media only screen and (max-height: 500px) {
+  	img {
+		height: 120px;
+	}
+
+ 	#map {
+		bottom: 126px;
+	}
+}
+
+@media only screen and (max-width: 550px) {
+  	.refresh {
+		width: 150px;
+	}
+	/* is there extra black around when viewed in google nexus? Why does this happend and how to fix it.* /
 }

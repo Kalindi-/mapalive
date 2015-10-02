@@ -1,25 +1,35 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="utf-8">
+    <title>mapalive</title>
     <link rel="stylesheet" href="map111.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="http://www.iconj.com/ico/z/0/z08q27u5jk.ico">
     <script src="http://knockoutjs.com/downloads/knockout-3.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
   </head>
   <body>
-    <div class="together">
-      <div id="map">
-      </div>
-      <div class="search">
-        <form action="#">
-          <input placeholder="Search..." type="search" name="q" data-bind="value: userInput, textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
-        <ul data-bind="foreach: visibleLocations">
-          <li data-bind="text: name"></li>
-        </ul>
-      </div>
+    <div id="map"></div>
+    <div class="search">
+      <!-- ko if: displayMessage -->
+      <p class="refresh" data-bind=" event: { click: refreshClick } ">SHOW ALL</p>
+      <!-- /ko -->
+      <input placeholder="Search among the locations..." type="search" name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
     </div>
 
+    <ul data-bind="foreach: visibleLocations">
+      <li data-bind="text: name, event: { click: locationClick }"></li>
+    </ul>
 
+  <div class="scroll">
+  <div id="images"></div>
+ <!--    <div id="images" data-bind="foreach: imagesArray">
+      <a data-bind="attr: { href: $data}"></a>
+    </div> -->
 
+  </div>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM"></script>
     <script src="map111.js"> </script>
   </body>
