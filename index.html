@@ -2,42 +2,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>mapalive</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/mapalive.css">
-  <link rel="shortcut icon" href="http://www.iconj.com/ico/z/0/z08q27u5jk.ico">
-  <script src="js/knockout-3.2.0.js"></script>
-  <script src="js/jquery-1.11.3.min.js"></script>
+	<meta charset="utf-8">
+	<title>mapalive</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="css/mapalive.css">
+	<link rel="shortcut icon" href="http://www.iconj.com/ico/z/0/z08q27u5jk.ico">
+	<script src="js/knockout-3.2.0.js"></script>
+	<script src="js/jquery-1.11.3.min.js"></script>
 </head>
 <body>
-  <!-- google maps map -->
-  <div id="map"></div>
-  <!-- search bar that sends info about the input at keyup and if bound refresh button-->
-  <div class="search">
-    <!-- ko if: displayMessage -->
-      <p class="refresh" data-bind="event: { click: refreshClick }">SHOW ALL</p>
-    <!-- /ko -->
-    <input placeholder="Search among the locations..." type="search" name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
-  </div>
-  <!-- list of visible locations, populated through an observable -->
-  <ul data-bind="foreach: visibleLocations">
-    <!-- a click chooses this location, and shows only one marker -->
-    <li data-bind="text: name, event: { click: locationClick }"></li>
-  </ul>
-  <!-- images obtained through Flickr API, populated through an observable -->
-  <div class="scroll" id="images" data-bind="foreach: imagesArray">
-    <!-- each element is a list with the info to populate the links -->
-    <a target="_blank" data-bind="attr: { href: $data[0]}">
-      <img data-bind="attr: { src: $data[1], alt: $data[2]}">
-    </a>
-  </div>
-  <!-- ko if: errorMessage -->
-  <p class="error"> There seems to be an error with the apis</p>
-  <!-- /ko -->
-  <!-- google maps api -->
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM"></script>
-  <!-- my scrip for the project -->
-  <script src="js/mapalive.js"> </script>
+	<!-- google maps map -->
+	<div id="map"></div>
+	<!-- search bar that sends info about the input at keyup and if bound refresh button-->
+	<div class="search">
+		<p class="refresh" data-bind="visible: displayMessage, event: { click: refreshClick }">SHOW ALL</p>
+		<input placeholder="Search among the locations..." type="search" name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
+	</div>
+	<!-- list of visible locations, populated through an observable -->
+	<ul data-bind="foreach: visibleLocations">
+		<!-- a click chooses this location, and shows only one marker -->
+		<li data-bind="text: name, event: { click: locationClick }"></li>
+	</ul>
+	<!-- images obtained through Flickr API, populated through an observable -->
+	<div class="scroll" id="images" data-bind="foreach: imagesArray">
+		<!-- each element is a list with the info to populate the links -->
+		<a target="_blank" data-bind="attr: { href: $data[0]}">
+			<img data-bind="attr: { src: $data[1], alt: $data[2]}">
+		</a>
+	</div>
+	<!-- error message if api loading goes wrong -->
+	<p data-bind="visible: errorMessage" class="error">There seems to be an error with the apis</p>
+	<!-- google maps api -->
+	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM"></script>
+	<!-- my scrip for the project -->
+	<script src="js/mapalive.js"> </script>
 </body>
 </html>

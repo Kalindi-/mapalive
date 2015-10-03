@@ -38,12 +38,16 @@ input {
 	/** infowindow hides behind search TODO fix PROBLEM! tried zIndex on infoWindow, didnt manage*/
 }
 
+.info-window {
+	position: relative;
+	z-index: 100;
+}
+
 .error {
 	color: white;
 	position: fixed;
 	bottom: 30px;
 	right: 50px;
-
 }
 
 

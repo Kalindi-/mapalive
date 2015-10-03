@@ -41,7 +41,7 @@ var locations = [
     },{
         name : "strunjan",
         coordinates : [45.528669, 13.608685],
-        description : "there is a cute line of trees if you zoom in, walk sweet, but up on the hills or by the sea"
+        description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea"
     }
 ] // maybe TODO add keywords
 
@@ -68,7 +68,7 @@ var initMap = function() {
         })
         map.fitBounds(bounds);
     } else {
-        errorMessage = true
+        errorMessage = true;
     }
 };
 initMap();
@@ -81,21 +81,24 @@ initMap();
  * makes latlng and markers for google maps from given info
  */
 var refreshPhotos = function() {
-    var flickerAPI = "https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=475b3ad500b92ed51c6657bb3ebd262e&format=json?jsoncallback=?";
+    var flickerAPI = 'https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=475b3ad500b92ed51c6657bb3ebd262e&jsoncallback=?';
     $.getJSON( flickerAPI, {
         // takes photoSearch parameter either from searches or clicks on markers
         tags: photoSearch,
-        format: "json"
+        format: 'json',
+        text: "-woman, -man, -portrait"
+
     })
     .done( function(data) {
-        //when done runs the function that was returned with its data
+        // when done runs the function that was returned with its data
         jsonFlickrApi(data);
     })
-    // .fail(
-    //     function(d, textStatus, error) {
-    //     console.error("getJSON failed, status: " + textStatus + ", error: "+error)
-    //     alert( "error" );
-    // }) // TODO PROBLEM! failing? why does this always fail?
+    .fail(
+        // when fails gives the message
+        function(d, textStatus, error) {
+        errorMessage = true;
+        console.error("getJSON failed, status: " + textStatus + ", error: "+error);
+    })
 };
 
 
@@ -124,6 +127,8 @@ var Place = function(data) {
  * knockout ViewModel that connects delivers the info from one area to another
  */
 var locationsToUse; // to be used among all the functions in the file. Is this how it is done? What is a better way?
+
+// keyword to input into the api search
 var photoSearch = "istrien";
 var ViewModel = function() {
     // making this accessable
@@ -214,7 +219,7 @@ var ViewModel = function() {
      * Flickr api call translations
      */
     self.jsonFlickrApi = function(info) {
-        console.log()
+
         if (info.photos != undefined) {
             // empties array
             self.imagesArray([])
@@ -253,7 +258,7 @@ var makeInfoWindow = function() {
     locationsToUse.forEach(function(place) {
         google.maps.event.addListener(place.marker, 'click', function(loc) {
             return function() {
-                infoWindow.setContent('<h4>'+ loc.name + '</h4> <p>' + loc.description + '</p>');
+                infoWindow.setContent('<h4 class="info-window">'+ loc.name + '</h4> <p>' + loc.description + '</p>');
                 infoWindow.open(map, this);
                 photoSearch = loc.name;
                 displayMessage(true);
@@ -262,7 +267,7 @@ var makeInfoWindow = function() {
                 place.marker.setAnimation(google.maps.Animation.DROP);
                 place.marker.setMap(map);
                 map.setCenter(place.marker.getPosition());
-                // TODO PROBLEM! infoWindow on top of everythin, tried different ways to set zIndex.
+                // TODO PROBLEM! infoWindow on top of everything, tried different ways to set zIndex, did not work.
                 // TODO MAYBE move to the right if under locations list (how?)
             }
         }(place))
