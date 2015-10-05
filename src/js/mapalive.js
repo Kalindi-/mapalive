@@ -7,43 +7,39 @@
  */
 var locations = [
     {
-        name : "belvedere",
-        coordinates : [45.537589, 13.618552],
-        description : "Sweet round hill, with endless views and wind"
-    },{
-        name : "debeli rtič",
+        name : "DEBELI RTIČ",
         coordinates : [45.5904856, 13.7021026],
         description : "it being on the other side of the bay, makes for an uncommon view"
     },{
-        name : "dragonja",
+        name : "DRAGONJA",
         coordinates : [45.451040, 13.692053],
         description : "river waters, fresh valley, saw a snake eat a fish once"
     },{
-        name : "piran",
+        name : "PIRAN",
         coordinates : [45.530337, 13.562947],
         description : "looks nice from above, and from the sea, and theres plenty of both"
     },{
-        name : "savudrija",
+        name : "SAVUDRIJA",
         coordinates : [45.50, 13.504],
         description : ": )"
     },{
-        name : "seča",
+        name : "SEČA",
         coordinates : [45.486138, 13.626889],
         description : "there is a playground for adoults here, swims also deacent"
     },{
-        name : "soline",
+        name : "SOLINE",
         coordinates : [45.490521, 13.601933],
         description : "great scenery, salt used to be the real deal some time ago"
     },{
-        name : "strugnano",
-        coordinates : [45.527949, 13.593080],
-        description : "pretty cliffs, looking like a big rock whale"
+        name : "STRUGNANO",
+        coordinates : [45.537589, 13.618552],
+        description : "Sweet round hill, with endless views and wind, and down pretty cliffs, looking like a big rock whale"
     },{
-        name : "strunjan",
+        name : "STRUNJAN",
         coordinates : [45.528669, 13.608685],
         description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea"
     }
-] // maybe TODO add keywords
+]; // TODO MAYBE add keywords
 
 
 // trying jSDout
@@ -55,7 +51,7 @@ var locations = [
 var map;
 var errorMessage;
 var initMap = function() {
-    if (google != undefined) {
+    if (google !== undefined) {
         map = new google.maps.Map(document.getElementById('map'), {
             mapTypeId: google.maps.MapTypeId.HYBRID,
             mapTypeControl: false,
@@ -65,13 +61,33 @@ var initMap = function() {
         locations.forEach(function(location) {
             var latlngBound = new google.maps.LatLng(location.coordinates[0], location.coordinates[1]);
             bounds.extend(latlngBound);
-        })
+        });
         map.fitBounds(bounds);
     } else {
         errorMessage = true;
     }
 };
 initMap();
+
+//TODO COMMENT
+
+var currentWeather;
+var getWeather = function() {
+    var weatherPlace = "piran"
+    var locationQuery = escape("select item.condition from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + weatherPlace + "') and u='c'");
+    var  weatherAPI = "http://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&callback=?";
+    $.getJSON( weatherAPI )
+    .done( function(data) {
+        currentWeather = data.query.results.channel.item.condition;
+        getWeatherInfo(currentWeather);
+    })
+    .fail( function() {
+        conosle.log("no")
+    })
+            // really don't get what this done fail, or if it works...
+            // TODO UNDERSTAND
+    }
+getWeather();
 
 
 /**
@@ -86,20 +102,22 @@ var refreshPhotos = function() {
         // takes photoSearch parameter either from searches or clicks on markers
         tags: photoSearch,
         format: 'json',
-        text: "-woman, -man, -portrait"
-
+        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people"
     })
     .done( function(data) {
         // when done runs the function that was returned with its data
         jsonFlickrApi(data);
     })
     .fail(
+        // there seems to be a proble with this fail
         // when fails gives the message
         function(d, textStatus, error) {
         errorMessage = true;
         console.error("getJSON failed, status: " + textStatus + ", error: "+error);
-    })
+    });
 };
+
+
 
 
 /**
@@ -126,7 +144,7 @@ var Place = function(data) {
  * @constructor (what does this mean actually)
  * knockout ViewModel that connects delivers the info from one area to another
  */
-var locationsToUse; // to be used among all the functions in the file. Is this how it is done? What is a better way?
+var locationsToUse; // TODO UNDERSTAND to be used among all the functions in the file. Is this how it is done? What is a better way?
 
 // keyword to input into the api search
 var photoSearch = "istrien";
@@ -136,8 +154,9 @@ var ViewModel = function() {
 
     // defining and populating the observable locationsArray
     self.locationsArray = ko.observableArray([]);
-    locations.forEach(function(place){
-        self.locationsArray.push( new Place(place))
+    locations.forEach(function(place) {
+        self.locationsArray.push(
+            new Place(place));
     });
 
     // initializing some observables used in the html
@@ -150,25 +169,24 @@ var ViewModel = function() {
     var search = "";
     self.showLocations = function(location) {
         // remove all visible locations
-        photoSearch = "";+
+        photoSearch = "";
         self.visibleLocations.removeAll();
         // loop through exisiting locations and add those fitting standards to visible locations
         locationsArray().forEach(function(place) {
             // true if search string is part of name or description of location
-            if ( place.name.indexOf(location) > -1 || place.description.indexOf(location) > -1) {
+            if ( place.name.toLowerCase().indexOf(location) > -1 || place.description.indexOf(location) > -1) {
                 // TODO MAYBE something about details search
                 self.visibleLocations.push(place);
                 place.marker.setMap(map);
-                photoSearch += place.name + ", " ;
+                photoSearch += place.name + ", ";
                 // kinda crappy to go through thes last steps each time, no?
             }
             // if no search fits show no markers
-            else if ( place.name.indexOf(location) === -1 ) {
+            else if ( place.name.toLowerCase().indexOf(location.toLowerCase()) === -1 ) {
                 place.marker.setMap(null);
             }
         });
         // shows a generic term when either all are selected or none
-        // TODO - delete this when random images - problem maybe, because
         if ( visibleLocations().length === locations.length ) {
             self.displayMessage(false);
             photoSearch = "istrien";
@@ -176,7 +194,7 @@ var ViewModel = function() {
             photoSearch = "istria";
         }
         return visibleLocations();
-    }
+    };
     // refreshes the photos based on search
     refreshPhotos();
     // sets the location based on the search
@@ -189,7 +207,7 @@ var ViewModel = function() {
         self.displayMessage(true);
         showLocations(search);
         refreshPhotos();
-    }
+    };
 
     // is called when user clicks on one of the words in the list
     // sets of location array and photo refresh
@@ -199,17 +217,28 @@ var ViewModel = function() {
         photoSearch = location.name;
         self.displayMessage(true);
         refreshPhotos();
-    }
+    };
 
     // is called by the user clicking the "SHOW ALL"
     // refreshes the page to a "beggining" state
-    self.refreshClick = function (location) {
+    self.refreshClick = function () {
         search = "";
         self.userInput("");
         infoWindow.close();
         showLocations(search);
         refreshPhotos();
-    }
+    };
+
+    // TODO COMMENT
+
+    self.wheaterImage = ko.observable('')
+    self.wheaterTemperature = ko.observable('')
+    // wheater image info
+
+    self.getWeatherInfo = function(currentWeather) {
+        self.wheaterImage('http://l.yimg.com/a/i/us/we/52/'+ currentWeather.code +'.gif');
+        self.wheaterTemperature(currentWeather.temp + "°C");
+    };
 
 
     // observable used in the html, pupulated by the flickr api answer
@@ -219,10 +248,9 @@ var ViewModel = function() {
      * Flickr api call translations
      */
     self.jsonFlickrApi = function(info) {
-
-        if (info.photos != undefined) {
+        if (info.photos !== undefined) {
             // empties array
-            self.imagesArray([])
+            self.imagesArray([]);
             // loops through the photo info given by Flickr and make link to flickr img, img url and img alt
             info.photos.photo.forEach(function(data){
                 self.imagesArray.push([
@@ -234,7 +262,7 @@ var ViewModel = function() {
         } else {
             self.errorMessage(true);
         }
-    }
+    };
 };
 // give the info to the html
 ko.applyBindings(ViewModel());
@@ -258,7 +286,7 @@ var makeInfoWindow = function() {
     locationsToUse.forEach(function(place) {
         google.maps.event.addListener(place.marker, 'click', function(loc) {
             return function() {
-                infoWindow.setContent('<h4 class="info-window">'+ loc.name + '</h4> <p>' + loc.description + '</p>');
+                infoWindow.setContent('<h4>'+ loc.name + '</h4> <p>' + loc.description + '</p>');
                 infoWindow.open(map, this);
                 photoSearch = loc.name;
                 displayMessage(true);
@@ -269,10 +297,10 @@ var makeInfoWindow = function() {
                 map.setCenter(place.marker.getPosition());
                 // TODO PROBLEM! infoWindow on top of everything, tried different ways to set zIndex, did not work.
                 // TODO MAYBE move to the right if under locations list (how?)
-            }
-        }(place))
+            };
+        }(place));
     });
-}
+};
 makeInfoWindow();
 
 

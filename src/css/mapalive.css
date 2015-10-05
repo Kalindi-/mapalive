@@ -1,0 +1,129 @@
+/**
+ * CSS file for mapalive project
+ */
+
+/** body style */
+body {
+	background-color:  black;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/** map style */
+#map {
+	position: fixed !important;
+	top: 0.313em;
+	right: 0.313em;
+	bottom: 11.625em;
+	left: 0.313em;
+}
+
+
+/** style of search bar and refresh link */
+.refresh {
+	margin: 0.063em;
+	width: 4.3em;
+	padding-right: 0.25em;
+	font-size: 1.125em;
+	text-shadow: #000 0 0 0.063em;
+}
+
+input {
+	width: 99%;
+	/*height: 6.250em; /** TODO PROBLEM! enlarge input, can't make it higher*/
+}
+
+.search {
+	display: flex;
+	margin-bottom: -0.25em;
+	/** infowindow hides behind search TODO PROBLEM! fix, tried zIndex on infoWindow, didnt manage*/
+}
+
+.error {
+	color: white;
+	position: fixed;
+	bottom: 1.875em;
+	right: 3.125em;
+}
+
+
+/** style for list of locations starting */
+.search,
+li {
+	position: relative;
+	z-index: 1;
+	color: white;
+}
+
+li {
+	list-style-type: none;
+	margin: 0.5em 0 0.5em -1.875em;
+	font-size: 1.125em;
+    text-shadow: #000 0 0 0.063em, #000 0 0 0.063em, #000 0 0 0.063em,
+             #000 0 0 0.063em, #000 0 0 0.063em;
+    -webkit-font-smoothing: antialiased;
+    width: 1%; /* to prevent it from making the whole lenght clickable */
+    white-space: nowrap;
+    font-weight: 100;
+}
+
+
+/** style for images and image containing scroll area */
+.scroll {
+	overflow-x: scroll;
+	position: fixed;
+	width: 99%;
+	top: calc(100% - 11.6em);
+	left: 0.313em;
+	right: 0.313em;
+}
+
+#images {
+	white-space: nowrap;
+}
+
+.location-image {
+	border: 0.188em solid black;
+	margin: 0 -0.188em -0.188em;
+	height: 10.25em;
+}
+
+.weather-image {
+	margin-bottom: -1em;
+}
+
+span {
+	font-size: 1.4em;
+	font-family: "Arial Narrow";
+}
+
+
+/** media querries for smaller screens */
+@media only screen and (max-height: 500px) {
+  	.location-image {
+		height: 6.250em;
+	}
+
+	.scroll {
+		top: calc(100% - 6.7em);
+	}
+
+ 	#map {
+		bottom: 6.7em;
+	}
+
+	.weather-image {
+		height: 2.7em;
+	}
+}
+
+@media only screen and (max-width: 550px) {
+  	.refresh {
+  		font-size: 0.8em;
+		width: 4.5em;
+	}
+	/* TODO PROBLEM! is there some extra black border around the whole page when viewed in google nexus? Why does this happend and how to fix it.*/
+	li {
+		margin: 0.2em 0 0.2em -1.875em;
+	}
+}
