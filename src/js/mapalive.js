@@ -25,7 +25,7 @@ var locations = [
     },{
         name : "SEČA",
         coordinates : [45.486138, 13.626889],
-        description : "there is a playground for adoults here, swims also deacent"
+        description : "there is a playground for adults here, swims also decent"
     },{
         name : "SOLINE",
         coordinates : [45.490521, 13.601933],
@@ -212,7 +212,7 @@ var ViewModel = function() {
     // is called when user clicks on one of the words in the list
     // sets of location array and photo refresh
     self.locationClick = function (location) {
-        search = location.name;
+        search = location.name.toLowerCase();
         showLocations(search);
         photoSearch = location.name;
         self.displayMessage(true);
