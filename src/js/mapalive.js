@@ -69,8 +69,11 @@ var initMap = function() {
 };
 initMap();
 
-//TODO COMMENT
-
+/**
+ * @constructor
+ * gets weather info from the Yahoo weather API given the predefined location
+ * passes weather condition info to the getWeatherInfo
+ */
 var currentWeather;
 var getWeather = function() {
     var weatherPlace = "piran"
@@ -82,7 +85,7 @@ var getWeather = function() {
         getWeatherInfo(currentWeather);
     })
     .fail( function() {
-        conosle.log("no")
+        conosle.log("no weather")
     })
             // really don't get what this done fail, or if it works...
             // TODO UNDERSTAND
@@ -118,8 +121,6 @@ var refreshPhotos = function() {
 };
 
 
-
-
 /**
  * function that constructs the Flickr API call
  * @param {dictionary} data - one dictionariy info form the list of locations
@@ -140,14 +141,15 @@ var Place = function(data) {
 };
 
 
-/**
- * @constructor (what does this mean actually)
- * knockout ViewModel that connects delivers the info from one area to another
- */
 var locationsToUse; // TODO UNDERSTAND to be used among all the functions in the file. Is this how it is done? What is a better way?
 
 // keyword to input into the api search
 var photoSearch = "istrien";
+
+/**
+ * @constructor (what does this mean actually)
+ * knockout ViewModel that connects delivers the info from one area to another
+ */
 var ViewModel = function() {
     // making this accessable
     var self = this;
@@ -172,6 +174,7 @@ var ViewModel = function() {
         photoSearch = "";
         self.visibleLocations.removeAll();
         // loop through exisiting locations and add those fitting standards to visible locations
+
         locationsArray().forEach(function(place) {
             // true if search string is part of name or description of location
             if ( place.name.toLowerCase().indexOf(location) > -1 || place.description.indexOf(location) > -1) {
@@ -229,23 +232,23 @@ var ViewModel = function() {
         refreshPhotos();
     };
 
-    // TODO COMMENT
-
+    // initiating the weather image and temperature observables
     self.wheaterImage = ko.observable('')
     self.wheaterTemperature = ko.observable('')
-    // wheater image info
 
+    // is called by getWeather, that inputs data received by the weather API
+    // takes weather info and puts it into the weather observables
     self.getWeatherInfo = function(currentWeather) {
         self.wheaterImage('http://l.yimg.com/a/i/us/we/52/'+ currentWeather.code +'.gif');
         self.wheaterTemperature(currentWeather.temp + "°C");
     };
 
-
     // observable used in the html, pupulated by the flickr api answer
     self.imagesArray = ko.observableArray([]);
     self.errorMessage = ko.observable(errorMessage);
+
     /**
-     * Flickr api call translations
+     * Flickr api call translations to image info, for the scrollable display
      */
     self.jsonFlickrApi = function(info) {
         if (info.photos !== undefined) {

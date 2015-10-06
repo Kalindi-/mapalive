@@ -16,11 +16,7 @@
 	<!-- search bar that sends info about the input at keyup and if bound refresh button-->
 	<div class="search">
 		<p class="refresh" data-bind="visible: displayMessage, event: { click: refreshClick }">show all</p>
-		<input placeholder="Search among the locations..." type="search" name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
-		<!--TODO MAYBE toggle keys
-		<div class="toggle">
-		 1 2 3 4
-		</div> -->
+		<input placeholder="Search locations and their descriptions..." type="search" name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
 	</div>
 	<!-- the image of the current weather, maybe crappy solution, but this way it is on top of the list choices-->
 	<ul>
