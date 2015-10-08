@@ -39,7 +39,7 @@ var locations = [
     },{
         name : "STRUGNANO",
         coordinates : [45.537589, 13.618552],
-        description : "Sweet round hill, with endless views and wind, and down pretty cliffs, looking like a big rock whale",
+        description : "Sweet round hill, with endless views and wind, and cliffs looking like big rock whales",
         activity : ["swim", "walk"]
     },{
         name : "STRUNJAN",
@@ -47,7 +47,7 @@ var locations = [
         description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea",
         activity : ["walk", "bike"]
     }
-]; // TODO MAYBE add keywords
+];
 
 
 // trying jSDout
@@ -84,7 +84,7 @@ initMap();
  */
 var currentWeather;
 var getWeather = function() {
-    var weatherPlace = "piran"
+    var weatherPlace = "piran";
     var locationQuery = escape("select item.condition from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + weatherPlace + "') and u='c'");
     var  weatherAPI = "http://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&callback=?";
     $.getJSON( weatherAPI )
@@ -93,11 +93,9 @@ var getWeather = function() {
         getWeatherInfo(currentWeather);
     })
     .fail( function() {
-        console.log("no weather")
-    })
-            // really don't get what this done fail, or if it works...
-            // TODO UNDERSTAND
-    }
+        console.log("no weather");
+    });
+};
 getWeather();
 
 
@@ -113,7 +111,7 @@ var refreshPhotos = function() {
         // takes photoSearch parameter either from searches or clicks on markers
         tags: photoSearch,
         format: 'json',
-        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people"
+        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people, -pirat"
     })
     .done( function(data) {
         // when done runs the function that was returned with its data
@@ -242,8 +240,8 @@ var ViewModel = function() {
 
 
     // initiating the weather image and temperature observables
-    self.wheaterImage = ko.observable('')
-    self.wheaterTemperature = ko.observable('')
+    self.wheaterImage = ko.observable('');
+    self.wheaterTemperature = ko.observable('');
 
     // is called by getWeather, that inputs data received by the weather API
     // takes weather info and puts it into the weather observables
