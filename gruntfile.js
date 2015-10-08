@@ -41,7 +41,7 @@ module.exports = function(grunt) {
 		    }
 		},
   		watch: {
-    		files: ['src/js/mapalive.js', 'src/css/mapalive.css', 'src/index'],
+    		files: ['src/js/mapalive.js', 'src/css/mapalive.css', 'src/index.html'],
       		tasks: ['default']
   		}
 	});
@@ -49,8 +49,8 @@ module.exports = function(grunt) {
 	grunt.registerTask('default', [
 		'uglify',
 		'cssmin',
-		'htmlmin',
-		'watch'
+		'htmlmin'
+		//, 'watch'
 		]);
 }
 

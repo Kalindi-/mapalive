@@ -9,35 +9,43 @@ var locations = [
     {
         name : "DEBELI RTIČ",
         coordinates : [45.5904856, 13.7021026],
-        description : "it being on the other side of the bay, makes for an uncommon view"
+        description : "it being on the other side of the bay, makes for an uncommon view",
+        activity : ["swim"]
     },{
         name : "DRAGONJA",
         coordinates : [45.451040, 13.692053],
-        description : "river waters, fresh valley, saw a snake eat a fish once"
+        description : "river waters, fresh valley, saw a snake eat a fish once",
+        activity : ["swim", "walk", "bike"]
     },{
         name : "PIRAN",
         coordinates : [45.530337, 13.562947],
-        description : "looks nice from above, and from the sea, and theres plenty of both"
+        description : "looks nice from above, and from the sea, and theres plenty of both",
+        activity : ["swim", "dive", "walk"]
     },{
         name : "SAVUDRIJA",
         coordinates : [45.50, 13.504],
-        description : ": )"
+        description : ": )",
+        activity : ["swim", "dive", "walk", "bike"]
     },{
         name : "SEČA",
         coordinates : [45.486138, 13.626889],
-        description : "there is a playground for adults here, swims also decent"
+        description : "there is a playground for adults here, swims also decent",
+        activity : ["swim", "walk", "bike"]
     },{
         name : "SOLINE",
         coordinates : [45.490521, 13.601933],
-        description : "great scenery, salt used to be the real deal some time ago"
+        description : "great scenery, salt used to be the real deal some time ago",
+        activity : ["swim", "walk", "bike"]
     },{
         name : "STRUGNANO",
         coordinates : [45.537589, 13.618552],
-        description : "Sweet round hill, with endless views and wind, and down pretty cliffs, looking like a big rock whale"
+        description : "Sweet round hill, with endless views and wind, and down pretty cliffs, looking like a big rock whale",
+        activity : ["swim", "walk"]
     },{
         name : "STRUNJAN",
         coordinates : [45.528669, 13.608685],
-        description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea"
+        description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea",
+        activity : ["walk", "bike"]
     }
 ]; // TODO MAYBE add keywords
 
@@ -85,7 +93,7 @@ var getWeather = function() {
         getWeatherInfo(currentWeather);
     })
     .fail( function() {
-        conosle.log("no weather")
+        console.log("no weather")
     })
             // really don't get what this done fail, or if it works...
             // TODO UNDERSTAND
@@ -144,7 +152,7 @@ var Place = function(data) {
 var locationsToUse; // TODO UNDERSTAND to be used among all the functions in the file. Is this how it is done? What is a better way?
 
 // keyword to input into the api search
-var photoSearch = "istrien";
+var photoSearch = "istria";
 
 /**
  * @constructor (what does this mean actually)
@@ -231,6 +239,7 @@ var ViewModel = function() {
         showLocations(search);
         refreshPhotos();
     };
+
 
     // initiating the weather image and temperature observables
     self.wheaterImage = ko.observable('')
