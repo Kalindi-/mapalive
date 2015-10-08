@@ -1,7 +1,9 @@
+
 /**
  * JS file for mapalive project, containing map, predefined keywords search functionality, and Flickr api.
  */
 
+// "use strict"; haha this is scary, I tried to put it in late into my project but gave up on it!: )
 /**
  * list of dicitonary objects rappresenting locations
  */
@@ -10,42 +12,42 @@ var locations = [
         name : "DEBELI RTIČ",
         coordinates : [45.5904856, 13.7021026],
         description : "it being on the other side of the bay, makes for an uncommon view",
-        activity : ["swim"]
+        activities : ["swimming"]
     },{
         name : "DRAGONJA",
         coordinates : [45.451040, 13.692053],
         description : "river waters, fresh valley, saw a snake eat a fish once",
-        activity : ["swim", "walk", "bike"]
+        activities: ["swimming", "walking", "biking"]
     },{
         name : "PIRAN",
         coordinates : [45.530337, 13.562947],
         description : "looks nice from above, and from the sea, and theres plenty of both",
-        activity : ["swim", "dive", "walk"]
+        activities : ["swimming", "diving", "walking"]
     },{
         name : "SAVUDRIJA",
         coordinates : [45.50, 13.504],
         description : ": )",
-        activity : ["swim", "dive", "walk", "bike"]
+        activities : ["swimming", "diving", "walking", "biking"]
     },{
         name : "SEČA",
-        coordinates : [45.486138, 13.626889],
+        coordinates : [45.501301, 13.587052],
         description : "there is a playground for adults here, swims also decent",
-        activity : ["swim", "walk", "bike"]
+        activities : ["swimming", "walking", "biking"]
     },{
         name : "SOLINE",
         coordinates : [45.490521, 13.601933],
         description : "great scenery, salt used to be the real deal some time ago",
-        activity : ["swim", "walk", "bike"]
+        activities : ["swimming", "walking", "biking"]
     },{
         name : "STRUGNANO",
         coordinates : [45.537589, 13.618552],
         description : "Sweet round hill, with endless views and wind, and cliffs looking like big rock whales",
-        activity : ["swim", "walk"]
+        activities : ["swimming", "walking"]
     },{
         name : "STRUNJAN",
         coordinates : [45.528669, 13.608685],
         description : "there is a cute line of trees if you zoom in, walk sweet, up on the hills or by the sea",
-        activity : ["walk", "bike"]
+        activities : ["walking", "biking"]
     }
 ];
 
@@ -111,8 +113,8 @@ var refreshPhotos = function() {
         // takes photoSearch parameter either from searches or clicks on markers
         tags: photoSearch,
         format: 'json',
-        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people, -pirat"
-    })
+        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people, -pirat",
+        tag_mode: 'all'    })
     .done( function(data) {
         // when done runs the function that was returned with its data
         jsonFlickrApi(data);
@@ -137,7 +139,8 @@ var Place = function(data) {
     this.name = data.name;
     this.coordinates = data.coordinates;
     this.description = data.description;
-    //
+    this.activities = data.activities;
+
     this.latlng = new google.maps.LatLng(this.coordinates[0], this.coordinates[1]);
     this.marker = new google.maps.Marker({
         position: this.latlng,
@@ -236,6 +239,31 @@ var ViewModel = function() {
         infoWindow.close();
         showLocations(search);
         refreshPhotos();
+    };
+
+    self.visibleActivity = ko.observable([true,true,true,true]);
+
+    // chose activity
+    self.chooseActivity = function(activity, order) {
+            self.visibleLocations.removeAll();
+            locationsArray().forEach(function(place) {
+                if ( place.activities.indexOf(activity) > -1 ) {
+                    self.visibleLocations.push(place);
+                    place.marker.setMap(map);
+                }
+                else if ( place.activities.indexOf(activity) === -1 ) {
+                    place.marker.setMap(null);
+                }
+            });
+            var visibility = [false,false,false,false]
+            visibility[order] = true
+            self.visibleActivity(visibility);
+            //this only work across this step, if I do it directly, it doesn't update well
+            self.visibleActivity()[order] = true;
+            self.displayMessage(true);
+            photoSearch = "istria, " + activity;
+            refreshPhotos();
+
     };
 
 
