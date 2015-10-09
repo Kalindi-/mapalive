@@ -1,5 +1,5 @@
-<!--html for mapalive project! learning about knockout and viewModel-->
 <!DOCTYPE html>
+<!--html for mapalive project! learning about knockout and viewModel-->
 <html>
 <head>
 	<meta charset="utf-8">
@@ -9,42 +9,47 @@
 	<link rel="stylesheet" href="css/mapalive.css">
 	<script src="js/knockout-3.2.0.js"></script>
 	<script src="js/jquery-2.1.4.min.js"></script>
+	<script src="js/firebase-2.2.1.js"></script>
 </head>
 <body>
 	<!-- google maps map -->
 	<div id="map"></div>
 	<!-- toggle activites selection, search bar that sends info about the input at keyup and if bound refresh button visible -->
-	<div class="options">
+	<div class="options" title="click to chose activity">
 		<!-- Icons made by http://www.freepik.com from http://www.flaticon.com licensed by CC BY 3.0 --><!-- toggle activites selection -->
 		<img class="activity" src="img/diver2.svg" data-bind="
-		  style: { backgroundColor: visibleActivity()[0] == true ? 'white' : '#888888' },
-		  click: chooseActivity.bind($data,'diving', 0)" >
+		  style: { backgroundColor: visibleActivity()[0] == true ? 'white' : '#888' },
+		  click: chooseActivity.bind($data,'diving', 0)"  alt="diving">
 		<img class="activity" src="img/swimmer5.svg" data-bind="
-		  style: { backgroundColor: visibleActivity()[1] == true ? 'white' : '#888888' },
-		  click: chooseActivity.bind($data,'swimming', 1)">
+		  style: { backgroundColor: visibleActivity()[1] == true ? 'white' : '#888' },
+		  click: chooseActivity.bind($data,'swimming', 1)" alt="swimming">
 		<img class="activity" src="img/vehicle73.svg" data-bind="
-		  style: { backgroundColor: visibleActivity()[2] == true ? 'white' : '#888888' },
-		  click: chooseActivity.bind($data,'biking', 2)">
+		  style: { backgroundColor: visibleActivity()[2] == true ? 'white' : '#888' },
+		  click: chooseActivity.bind($data,'biking', 2)" alt="biking">
 		<img class="activity" src="img/stickman125.svg" data-bind="
-		  style: { backgroundColor: visibleActivity()[3] == true ? 'white' : '#888888' },
-			click: chooseActivity.bind($data,'walking', 3)">
+		  style: { backgroundColor: visibleActivity()[3] == true ? 'white' : '#888' },
+			click: chooseActivity.bind($data,'walking', 3)" alt="walking">
    <!-- searchbar that sends info about the input at keyup and if bound refresh button visible -->
 		<p class="refresh" data-bind="visible: displayMessage,
 			event: { click: refreshClick }">show all</p>
 		<div class="search-bar">
-			<input class="place" type="search" placeholder="Search locations and their descriptions..."
-			 name="q" data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
+			<input type="search" placeholder="Search locations and their descriptions..."
+			 	data-bind="textInput: userInput, event: { keyup: availableLocations }" autocomplete="off">
+			<!-- offers a list of possible keywords, to be searching through -->
 			<!-- ko if: userInput  -->
-			<ul class="autocomplete" data-bind="foreach: showWords()">
-			<!-- a click chooses this location, and shows only one marker -->
-				<li class="word" data-bind="text: $data, event: { click: searchWord }"></li>
-			</ul>
+				<ul class="autocomplete" data-bind="foreach: showWords()">
+				<!-- a click chooses a word and it shows the places associated with this word -->
+					<li class="words" data-bind="text: $data, event: { click: searchWord }"></li>
+				</ul>
 			<!-- /ko -->
 		</div>
 	</div>
-	<!-- the image of the current weather, maybe crappy solution, but this way it is on top of the list choices-->
+	<!-- the image of the current weather, in a list to be displayed on top of the location list -->
 	<ul>
-		<li class="weather"><img class="weather-img" data-bind=" attr: { src: wheaterImage }, runafter: getWeatherInfo" alt="wheather img"><span data-bind=" text: wheaterTemperature, runafter: getWeatherInfo "></span></li>
+		<li class="weather" title="weather now">
+			<img class="weather-img" data-bind=" attr: { src: wheaterImage }, runafter: getWeatherInfo" alt="wheather img">
+			<span class="weather-text" data-bind=" text: wheaterTemperature, runafter: getWeatherInfo "></span>
+		</li>
 	</ul>
 	<ul data-bind="foreach: visibleLocations">
 		<!-- a click chooses this location, and shows only one marker -->
@@ -54,9 +59,11 @@
 	<div class="scroll" id="images" data-bind="foreach: imagesArray">
 		<!-- each element is a list with the info to populate the links -->
 		<a target="_blank" data-bind="attr: { href: $data[0]}">
-			<img class="location-img" data-bind="attr: { src: $data[1], alt: $data[2]}">
+			<img class="location-img" data-bind="attr: { src: $data[1], alt: $data[2]}" alt="images from api">
 		</a>
 	</div>
+	<!-- users firebase to store how many users are online and displays it here-->
+	<p class="users-online" title="users online" data-bind=" text: usersOnline"></p>
 	<!-- error message if api loading goes wrong -->
 	<p data-bind="visible: errorMessage" class="error">There seems to be an error with the apis</p>
 	<!-- google maps api -->

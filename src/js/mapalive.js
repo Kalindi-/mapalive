@@ -3,7 +3,8 @@
  * JS file for mapalive project, containing map, predefined keywords search functionality, and Flickr api.
  */
 
-// "use strict"; haha this is scary, I tried to put it in late into my project but gave up on it!: )
+// "use strict"; I tried to put it in late into my project but gave up on it!: ) tried also putting it into the view model, and it als shows a lot of red things. Learning posponed
+
 /**
  * list of dicitonary objects rappresenting locations
  */
@@ -21,7 +22,7 @@ var locations = [
     },{
         name : "PIRAN",
         coordinates : [45.530337, 13.562947],
-        description : "looks nice from above, and from the sea, and there's plenty of both",
+        description : "looks nice from above, and from the sea, and there is plenty of both",
         activities : ["swimming", "diving", "walking"]
     },{
         name : "SAVUDRIJA",
@@ -41,7 +42,7 @@ var locations = [
     },{
         name : "STRUGNANO",
         coordinates : [45.537589, 13.618552],
-        description : "Sweet round hill, with endless views and wind, and cliffs looking like big rock whales",
+        description : "sweet round hill, with endless views and wind, and cliffs looking like big rock whales",
         activities : ["swimming", "walking"]
     },{
         name : "STRUNJAN",
@@ -213,11 +214,11 @@ var ViewModel = function() {
     // sets the location based on the search
     locationsToUse = self.showLocations(search);
 
-
+    // variables that deal with keywords to appear under the search bar during searching
     self.descriptionWords = ko.observableArray();
     self.showWords = ko.observableArray();
 
-    // TODO comments
+    // collect all words from description into descriptionWords.
     var allText = "";
     self.locationsArray().forEach(function(place) {
             allText += place.description.replace(",", "").split(" ") + ",";
@@ -226,6 +227,7 @@ var ViewModel = function() {
 
     // is called when the user input something in the search bar,
     // sets of location array and photo refresh
+    // and puts the possible keywords into showWords
     self.availableLocations = function() {
         self.showWords("");
         self.visibleActivity([true,true,true,true]);
@@ -236,7 +238,7 @@ var ViewModel = function() {
 
         self.showWords([]);
         self.descriptionWords()[0].forEach(function(word) {
-            if ( word.indexOf(search) > -1 ) {
+            if ( word.indexOf(search) > -1 && showWords().indexOf(word) == -1) {
                 self.showWords.push(word);
             }
         });
@@ -258,20 +260,22 @@ var ViewModel = function() {
     self.refreshClick = function () {
         self.visibleActivity([true,true,true,true]);
         search = "";
+        self.showWords([]);
         self.userInput("");
         infoWindow.close();
         self.showLocations(search);
         refreshPhotos();
     };
 
-    // TODO COMMENT
-    self.searchWord = function (word) {
+    // it shows the locations based on the keyword clicked.
+    self.searchWord = function(word) {
        self.userInput(word);
        self.availableLocations();
     };
 
-
-    // chose activity TODO COMMENTS
+    // choosing activity by clicking one of the images.
+    // The selected activity is true all else are false.
+    // if none are selcted all are true
     self.chooseActivity = function(activity, order) {
             self.visibleLocations.removeAll();
             self.locationsArray().forEach(function(place) {
@@ -291,7 +295,7 @@ var ViewModel = function() {
             self.displayMessage(true);
             photoSearch = "istria, " + activity;
             refreshPhotos();
-
+            // TODO MAYBE that more activities can be selected at the same time
     };
 
     // initiating the weather image and temperature observables
@@ -328,6 +332,36 @@ var ViewModel = function() {
             self.errorMessage(true);
         }
     };
+
+    // This uses firebase to keep track of users online at the moment
+    // starts off with 0 and adds 1
+    // TODO UNDERSTAND more
+    self.usersOnline = ko.observable(0);
+
+    self.getUsers = function() {
+        // make a new list into firebase
+        var listRef = new Firebase("https://blinding-fire-8036.firebaseio.com/presence/");
+        // put a user into the list
+        var userRef = listRef.push();
+
+        // Add to presence list when online.
+        var presenceRef = new Firebase("https://blinding-fire-8036.firebaseio.com/.info/connected");
+        presenceRef.on("value", function(snap) {
+            // what is snap
+            if (snap.val()) {
+                userRef.set(true);
+                // Remove when disconnected.
+                userRef.onDisconnect().remove();
+            }
+        });
+
+        // Number of online users is the number of objects in the presence list.
+        listRef.on("value", function(snap) {
+            self.usersOnline(snap.numChildren());
+        });
+    };
+    self.getUsers();
+
 };
 // give the info to the html
 ko.applyBindings(ViewModel());
@@ -375,3 +409,4 @@ makeInfoWindow();
 // http://stackoverflow.com/a/1505218
 // http://jsfiddle.net/mythical/XJEzc/
 // http://stackoverflow.com/a/23981970
+// http://stackoverflow.com/a/15982583

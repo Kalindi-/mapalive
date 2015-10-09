@@ -3,6 +3,9 @@
 A little map of some pretty places in the area where I grew up!
 
 After loading the index.html you can search for the places in the search bar (through names or keywords, that fit its description), or chose one from the list.
+When using the searchbar, a list of words taken from the descriptions gets presented too, giving the chance to choose a place according to keywords.
+
+Choose an activity and see where you can do it!
 
 If you want extra info about a place click the marker.
 
