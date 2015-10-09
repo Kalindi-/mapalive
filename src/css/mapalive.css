@@ -33,19 +33,31 @@ body {
 
 .refresh {
 	margin: 0.063em;
-	width: 4.6em;
+	width: 4.8em;
 	padding: 0 0.15em;
 	font-size: 1.125em;
 	text-shadow: #000 0 0 0.063em;
 }
 
-input {
+.search-bar,
+ input {
 	margin-left: 0.2em;
 	width: 99%;
+	max-width: 99%;
 	/*height: 6.250em; /** TODO PROBLEM! enlarge input, can't make it higher*/
 }
 
-.search {
+.autocomplete {
+	list-style-type: none;
+	margin-left: -2em;
+}
+
+.word {
+	margin: -0.6em 0.1em;
+}
+
+.autocomplete,
+.options {
 	display: flex;
 	margin-bottom: -0.25em;
 	/** infowindow hides behind search TODO PROBLEM! fix, tried zIndex on infoWindow, didnt manage*/
@@ -60,14 +72,16 @@ input {
 
 
 /** style for list of locations starting */
-.search,
-li {
+.options,
+.weather,
+.location {
 	position: relative;
 	z-index: 1;
 	color: white;
 }
 
-li {
+.weather,
+.location {
 	list-style-type: none;
 	margin: 0.5em 0 0.5em -1.875em;
 	font-size: 1.125em;
@@ -79,7 +93,8 @@ li {
     font-weight: 100;
 }
 
-.location {
+.location,
+.autocomplete {
 	cursor: pointer;
 }
 
@@ -104,9 +119,6 @@ li {
 	height: 10.25em;
 }
 
-.weather-img {
-	margin: -0.5em auto -1em;
-}
 
 span {
 	font-size: 1.4em;

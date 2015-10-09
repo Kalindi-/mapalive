@@ -21,7 +21,7 @@ var locations = [
     },{
         name : "PIRAN",
         coordinates : [45.530337, 13.562947],
-        description : "looks nice from above, and from the sea, and theres plenty of both",
+        description : "looks nice from above, and from the sea, and there's plenty of both",
         activities : ["swimming", "diving", "walking"]
     },{
         name : "SAVUDRIJA",
@@ -174,6 +174,7 @@ var ViewModel = function() {
     self.visibleLocations = ko.observableArray([]);
     self.userInput =  ko.observable('');
     self.displayMessage = ko.observable(false);
+    self.visibleActivity = ko.observable([true,true,true,true]);
 
     // determine the visible locations, show markers and list accordingly,
     // if text search show locations that fit the search
@@ -184,7 +185,7 @@ var ViewModel = function() {
         self.visibleLocations.removeAll();
         // loop through exisiting locations and add those fitting standards to visible locations
 
-        locationsArray().forEach(function(place) {
+        self.locationsArray().forEach(function(place) {
             // true if search string is part of name or description of location
             if ( place.name.toLowerCase().indexOf(location) > -1 || place.description.indexOf(location) > -1) {
                 // TODO MAYBE something about details search
@@ -199,33 +200,54 @@ var ViewModel = function() {
             }
         });
         // shows a generic term when either all are selected or none
-        if ( visibleLocations().length === locations.length ) {
+        if ( self.visibleLocations().length === locations.length ) {
             self.displayMessage(false);
             photoSearch = "istrien";
-        } else if ( visibleLocations().length === 0 ) {
+        } else if ( self.visibleLocations().length === 0 ) {
             photoSearch = "istria";
         }
-        return visibleLocations();
+        return self.visibleLocations();
     };
     // refreshes the photos based on search
     refreshPhotos();
     // sets the location based on the search
     locationsToUse = self.showLocations(search);
 
+
+    self.descriptionWords = ko.observableArray();
+    self.showWords = ko.observableArray();
+
+    // TODO comments
+    var allText = "";
+    self.locationsArray().forEach(function(place) {
+            allText += place.description.replace(",", "").split(" ") + ",";
+        });
+    self.descriptionWords.push(allText.split(","));
+
     // is called when the user input something in the search bar,
     // sets of location array and photo refresh
     self.availableLocations = function() {
+        self.showWords("");
+        self.visibleActivity([true,true,true,true]);
         search = self.userInput().toLowerCase();
         self.displayMessage(true);
-        showLocations(search);
+        self.showLocations(search);
         refreshPhotos();
+
+        self.showWords([]);
+        self.descriptionWords()[0].forEach(function(word) {
+            if ( word.indexOf(search) > -1 ) {
+                self.showWords.push(word);
+            }
+        });
     };
 
     // is called when user clicks on one of the words in the list
     // sets of location array and photo refresh
     self.locationClick = function (location) {
+        self.visibleActivity([true,true,true,true]);
         search = location.name.toLowerCase();
-        showLocations(search);
+        self.showLocations(search);
         photoSearch = location.name;
         self.displayMessage(true);
         refreshPhotos();
@@ -234,19 +256,25 @@ var ViewModel = function() {
     // is called by the user clicking the "SHOW ALL"
     // refreshes the page to a "beggining" state
     self.refreshClick = function () {
+        self.visibleActivity([true,true,true,true]);
         search = "";
         self.userInput("");
         infoWindow.close();
-        showLocations(search);
+        self.showLocations(search);
         refreshPhotos();
     };
 
-    self.visibleActivity = ko.observable([true,true,true,true]);
+    // TODO COMMENT
+    self.searchWord = function (word) {
+       self.userInput(word);
+       self.availableLocations();
+    };
 
-    // chose activity
+
+    // chose activity TODO COMMENTS
     self.chooseActivity = function(activity, order) {
             self.visibleLocations.removeAll();
-            locationsArray().forEach(function(place) {
+            self.locationsArray().forEach(function(place) {
                 if ( place.activities.indexOf(activity) > -1 ) {
                     self.visibleLocations.push(place);
                     place.marker.setMap(map);
@@ -255,8 +283,8 @@ var ViewModel = function() {
                     place.marker.setMap(null);
                 }
             });
-            var visibility = [false,false,false,false]
-            visibility[order] = true
+            var visibility = [false,false,false,false];
+            visibility[order] = true;
             self.visibleActivity(visibility);
             //this only work across this step, if I do it directly, it doesn't update well
             self.visibleActivity()[order] = true;
@@ -265,7 +293,6 @@ var ViewModel = function() {
             refreshPhotos();
 
     };
-
 
     // initiating the weather image and temperature observables
     self.wheaterImage = ko.observable('');
@@ -327,7 +354,7 @@ var makeInfoWindow = function() {
                 infoWindow.setContent('<h4>'+ loc.name + '</h4> <p>' + loc.description + '</p>');
                 infoWindow.open(map, this);
                 photoSearch = loc.name;
-                displayMessage(true);
+                self.displayMessage(true);
                 refreshPhotos();
                 place.marker.setMap(null);
                 place.marker.setAnimation(google.maps.Animation.DROP);
