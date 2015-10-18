@@ -16,6 +16,7 @@
 	<div id="map"></div>
 	<!-- toggle activites selection, search bar that sends info about the input at keyup and if bound refresh button visible -->
 	<div class="options" title="click to chose activity">
+		<img src="img/menu25.svg" class="toggle" data-bind="click: toggleVisibility">
 		<!-- Icons made by http://www.freepik.com from http://www.flaticon.com licensed by CC BY 3.0 --><!-- toggle activites selection -->
 		<img class="activity" src="img/diver2.svg" data-bind="
 		  style: { backgroundColor: visibleActivity()[0] == true ? 'white' : '#888' },
@@ -30,7 +31,7 @@
 		  style: { backgroundColor: visibleActivity()[3] == true ? 'white' : '#888' },
 			click: chooseActivity.bind($data,'walking', 3)" alt="walking">
    <!-- searchbar that sends info about the input at keyup and if bound refresh button visible -->
-		<p class="refresh" data-bind="visible: displayMessage,
+		<p class="refresh" data-bind="visible: refreshMessage,
 			event: { click: refreshClick }">show all</p>
 		<div class="search-bar">
 			<input type="search" placeholder="Search locations and their descriptions..."
@@ -39,21 +40,21 @@
 			<!-- ko if: userInput  -->
 				<ul class="autocomplete" data-bind="foreach: showWords()">
 				<!-- a click chooses a word and it shows the places associated with this word -->
-					<li class="words" data-bind="text: $data, event: { click: searchWord }"></li>
+					<li class="words" data-bind="text: $data, event: { click: $parent.searchWord }"></li>
 				</ul>
 			<!-- /ko -->
 		</div>
 	</div>
 	<!-- the image of the current weather, in a list to be displayed on top of the location list -->
-	<ul>
+	<ul data-bind="visible: showList">
 		<li class="weather" title="weather now">
 			<img class="weather-img" data-bind=" attr: { src: wheaterImage }, runafter: getWeatherInfo" alt="wheather img">
 			<span class="weather-text" data-bind=" text: wheaterTemperature, runafter: getWeatherInfo "></span>
 		</li>
 	</ul>
-	<ul data-bind="foreach: visibleLocations">
-		<!-- a click chooses this location, and shows only one marker -->
-		<li class="location" data-bind="text: name, event: { click: locationClick }"></li>
+	<ul data-bind="foreach: visibleLocations, visible: showList">
+	<!-- 	a click chooses this location, and shows only one marker -->
+		<li class="location" data-bind="text: name, event: { click: $parent.locationClick }"></li>
 	</ul>
 	<!-- images obtained through Flickr API, populated through an observable -->
 	<div class="scroll" id="images" data-bind="foreach: imagesArray">
@@ -65,10 +66,12 @@
 	<!-- users firebase to store how many users are online and displays it here-->
 	<p class="users-online" title="users online" data-bind=" text: usersOnline"></p>
 	<!-- error message if api loading goes wrong -->
-	<p data-bind="visible: errorMessage" class="error">There seems to be an error with the apis</p>
+	<p data-bind="visible: photoErrorMessage" class="error">No photos today : ( APISSUE</p>
 	<!-- google maps api -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM"></script>
+	<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMQu6vDS4dT9fNWj6LLI5ym9Z1A9oCIuM&callback=startAll">
+	</script>
 	<!-- my script for the project -->
-	<script src="js/mapalive.js"> </script>
+	<script src="js/mapalive.js"></script>
 </body>
 </html>

@@ -2,8 +2,8 @@
 /**
  * JS file for mapalive project, containing map, predefined keywords search functionality, and Flickr api.
  */
-
-// "use strict"; I tried to put it in late into my project but gave up on it!: ) tried also putting it into the view model, and it als shows a lot of red things. Learning posponed
+"use strict";
+// yaay!
 
 /**
  * list of dicitonary objects rappresenting locations
@@ -58,75 +58,22 @@ var locations = [
  * @constructor
  * Defining and initializing the map
  */
-
 var map;
-var errorMessage;
+var bounds;
 var initMap = function() {
     if (google !== undefined) {
         map = new google.maps.Map(document.getElementById('map'), {
             mapTypeId: google.maps.MapTypeId.HYBRID,
             mapTypeControl: false,
         });
-        var bounds = new google.maps.LatLngBounds();
+        bounds = new google.maps.LatLngBounds();
         // looping through the location
         locations.forEach(function(location) {
             var latlngBound = new google.maps.LatLng(location.coordinates[0], location.coordinates[1]);
             bounds.extend(latlngBound);
         });
         map.fitBounds(bounds);
-    } else {
-        errorMessage = true;
     }
-};
-initMap();
-
-/**
- * @constructor
- * gets weather info from the Yahoo weather API given the predefined location
- * passes weather condition info to the getWeatherInfo
- */
-var currentWeather;
-var getWeather = function() {
-    var weatherPlace = "piran";
-    var locationQuery = escape("select item.condition from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + weatherPlace + "') and u='c'");
-    var  weatherAPI = "http://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&callback=?";
-    $.getJSON( weatherAPI )
-    .done( function(data) {
-        currentWeather = data.query.results.channel.item.condition;
-        getWeatherInfo(currentWeather);
-    })
-    .fail( function() {
-        console.log("no weather");
-    });
-};
-getWeather();
-
-
-/**
- * function that constructs the Flickr API call
- * @param {dictionary} data - one dictionariy info form the list of locations
- * creates one Place object with the predefined info
- * makes latlng and markers for google maps from given info
- */
-var refreshPhotos = function() {
-    var flickerAPI = 'https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=475b3ad500b92ed51c6657bb3ebd262e&jsoncallback=?';
-    $.getJSON( flickerAPI, {
-        // takes photoSearch parameter either from searches or clicks on markers
-        tags: photoSearch,
-        format: 'json',
-        text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people, -pirat",
-        tag_mode: 'all'    })
-    .done( function(data) {
-        // when done runs the function that was returned with its data
-        jsonFlickrApi(data);
-    })
-    .fail(
-        // there seems to be a proble with this fail
-        // when fails gives the message
-        function(d, textStatus, error) {
-        errorMessage = true;
-        console.error("getJSON failed, status: " + textStatus + ", error: "+error);
-    });
 };
 
 
@@ -137,11 +84,12 @@ var refreshPhotos = function() {
  * makes latlng and markers for google maps from given
  */
 var Place = function(data) {
+    // hardcoded data
     this.name = data.name;
     this.coordinates = data.coordinates;
     this.description = data.description;
     this.activities = data.activities;
-
+    // data transformed into google usables
     this.latlng = new google.maps.LatLng(this.coordinates[0], this.coordinates[1]);
     this.marker = new google.maps.Marker({
         position: this.latlng,
@@ -151,18 +99,20 @@ var Place = function(data) {
 };
 
 
-var locationsToUse; // TODO UNDERSTAND to be used among all the functions in the file. Is this how it is done? What is a better way?
-
-// keyword to input into the api search
+// initializing keyword to input into the api search into the global scope
 var photoSearch = "istria";
 
 /**
- * @constructor (what does this mean actually)
+ * @constructor
  * knockout ViewModel that connects delivers the info from one area to another
  */
 var ViewModel = function() {
+
     // making this accessable
     var self = this;
+
+    // initializing locations to use
+    self.locationsToUse = ko.observableArray();
 
     // defining and populating the observable locationsArray
     self.locationsArray = ko.observableArray([]);
@@ -171,10 +121,30 @@ var ViewModel = function() {
             new Place(place));
     });
 
-    // initializing some observables used in the html
+    /**
+     * @constructor
+     * gets weather info from the Yahoo weather API given the predefined location
+     * passes weather condition info to the getWeatherInfo
+     */
+    var currentWeather;
+    self.getWeather = function() {
+        var weatherPlace = "piran";
+        var locationQuery = escape("select item.condition from weather.forecast where woeid in (select woeid from geo.places(1) where text='" + weatherPlace + "') and u='c'");
+        var weatherAPI = "http://query.yahooapis.com/v1/public/yql?q=" + locationQuery + "&format=json&callback=?";
+        $.getJSON( weatherAPI )
+        .done( function(data) {
+            currentWeather = data.query.results.channel.item.condition;
+            self.getWeatherInfo(currentWeather);
+        })
+        .fail( function() {
+            self.getWeatherInfo({code: "3200", temp: "??"});
+        });
+    };
+
+    // initializing observables used in the html
     self.visibleLocations = ko.observableArray([]);
     self.userInput =  ko.observable('');
-    self.displayMessage = ko.observable(false);
+    self.refreshMessage = ko.observable(false);
     self.visibleActivity = ko.observable([true,true,true,true]);
 
     // determine the visible locations, show markers and list accordingly,
@@ -184,15 +154,16 @@ var ViewModel = function() {
         // remove all visible locations
         photoSearch = "";
         self.visibleLocations.removeAll();
-        // loop through exisiting locations and add those fitting standards to visible locations
 
+        // loops through exisiting locations and add those fitting standards to visible locations
         self.locationsArray().forEach(function(place) {
             // true if search string is part of name or description of location
             if ( place.name.toLowerCase().indexOf(location) > -1 || place.description.indexOf(location) > -1) {
                 // TODO MAYBE something about details search
                 self.visibleLocations.push(place);
+                place.marker.icon = 'img/sea.png';
                 place.marker.setMap(map);
-                photoSearch += place.name + ", ";
+                photoSearch = place.name;
                 // kinda crappy to go through thes last steps each time, no?
             }
             // if no search fits show no markers
@@ -202,17 +173,49 @@ var ViewModel = function() {
         });
         // shows a generic term when either all are selected or none
         if ( self.visibleLocations().length === locations.length ) {
-            self.displayMessage(false);
-            photoSearch = "istrien";
+            self.refreshMessage(false);
+            photoSearch = "istra";
         } else if ( self.visibleLocations().length === 0 ) {
             photoSearch = "istria";
         }
         return self.visibleLocations();
     };
-    // refreshes the photos based on search
-    refreshPhotos();
+
+    self.showList = ko.observable(true);
+    self.toggleVisibility = function() {
+        self.showList(!self.showList());
+    };
+
+    /**
+     * function that constructs the Flickr API call
+     * @param {dictionary} data - one dictionariy info form the list of locations
+     * creates one Place object with the predefined info
+     * makes latlng and markers for google maps from given info
+     */
+
+    self.refreshPhotos = function() {
+        var flickerAPI = 'https://api.flickr.com/services/rest/?&method=flickr.photos.search&api_key=475b3ad500b92ed51c6657bb3ebd262e&jsoncallback=?';
+        $.getJSON( flickerAPI, {
+            // takes photoSearch parameter either from searches or clicks on markers
+            tags: photoSearch,
+            format: 'json',
+            text: "-woman, -man, -portrait, -wedding, -esuli, -car, -people, -pirat, -dubrovačkoneretvanskažupanija, -dubrovnik",
+            tag_mode: 'all'    })
+        .done( function(data) {
+            // make image for inforwindow. TODO PROBLEM, it uses the image of the previous search
+            var image = data.photos.photo[0];
+            self.photo = ko.observable('http://farm'+ image.farm +'.static.flickr.com/'+ image.server +'/'+ image.id +'_'+ image.secret +'_m.jpg');
+            // when done runs the function that was returned with its data
+            self.jsonFlickrApi(data);
+        })
+        .fail(
+            function(d, textStatus, error) {
+            self.photoErrorMessage(true);
+        });
+    };
+
     // sets the location based on the search
-    locationsToUse = self.showLocations(search);
+    self.locationsToUse(self.showLocations(search));
 
     // variables that deal with keywords to appear under the search bar during searching
     self.descriptionWords = ko.observableArray();
@@ -232,15 +235,17 @@ var ViewModel = function() {
         self.showWords("");
         self.visibleActivity([true,true,true,true]);
         search = self.userInput().toLowerCase();
-        self.displayMessage(true);
+        self.refreshMessage(true);
         self.showLocations(search);
-        refreshPhotos();
-
+        self.refreshPhotos();
         self.showWords([]);
         self.descriptionWords()[0].forEach(function(word) {
-            if ( word.indexOf(search) > -1 && showWords().indexOf(word) == -1) {
+            if ( word.indexOf(search) > -1 && self.showWords().indexOf(word) === -1) {
                 self.showWords.push(word);
             }
+            // TODO PROBLEM, i understand it to be a confusing set of "autocomplete" suggestions.
+            // And thans for the jQuerry link, but i was a bit excited to try to find a
+            // sloution withing knockout, so tips welcome.
         });
     };
 
@@ -250,9 +255,10 @@ var ViewModel = function() {
         self.visibleActivity([true,true,true,true]);
         search = location.name.toLowerCase();
         self.showLocations(search);
+        google.maps.event.trigger(location.marker, 'click');
         photoSearch = location.name;
-        self.displayMessage(true);
-        refreshPhotos();
+        self.refreshMessage(true);
+        self.refreshPhotos();
     };
 
     // is called by the user clicking the "SHOW ALL"
@@ -264,7 +270,7 @@ var ViewModel = function() {
         self.userInput("");
         infoWindow.close();
         self.showLocations(search);
-        refreshPhotos();
+        self.refreshPhotos();
     };
 
     // it shows the locations based on the keyword clicked.
@@ -277,25 +283,27 @@ var ViewModel = function() {
     // The selected activity is true all else are false.
     // if none are selcted all are true
     self.chooseActivity = function(activity, order) {
-            self.visibleLocations.removeAll();
-            self.locationsArray().forEach(function(place) {
-                if ( place.activities.indexOf(activity) > -1 ) {
-                    self.visibleLocations.push(place);
-                    place.marker.setMap(map);
-                }
-                else if ( place.activities.indexOf(activity) === -1 ) {
-                    place.marker.setMap(null);
-                }
-            });
-            var visibility = [false,false,false,false];
-            visibility[order] = true;
-            self.visibleActivity(visibility);
-            //this only work across this step, if I do it directly, it doesn't update well
-            self.visibleActivity()[order] = true;
-            self.displayMessage(true);
-            photoSearch = "istria, " + activity;
-            refreshPhotos();
-            // TODO MAYBE that more activities can be selected at the same time
+        self.visibleLocations.removeAll();
+        self.locationsArray().forEach(function(place) {
+            if ( place.activities.indexOf(activity) > -1 ) {
+                self.visibleLocations.push(place);
+                place.marker.icon = 'img/'+ activity +'.png';
+                place.marker.setMap(map);
+            }
+            else if ( place.activities.indexOf(activity) === -1 ) {
+                place.marker.setMap(null);
+            }
+        });
+        var visibility = [false,false,false,false];
+        visibility[order] = true;
+        self.visibleActivity(visibility);
+        //TODO UNDERSTAND PROBLEM this only work across this step, if I do it directly, it doesn't update well
+        self.refreshMessage(true);
+        photoSearch = 'istria, ' + activity;
+        self.refreshPhotos();
+        infoWindow.close();
+        map.fitBounds(bounds);
+        self.userInput('');
     };
 
     // initiating the weather image and temperature observables
@@ -310,8 +318,9 @@ var ViewModel = function() {
     };
 
     // observable used in the html, pupulated by the flickr api answer
+    self.photo = ko.observable();
     self.imagesArray = ko.observableArray([]);
-    self.errorMessage = ko.observable(errorMessage);
+    self.photoErrorMessage = ko.observable(false);
 
     /**
      * Flickr api call translations to image info, for the scrollable display
@@ -328,16 +337,14 @@ var ViewModel = function() {
                     "Flickr photo search keyword: " + photoSearch
                 ]);
             });
-        } else {
-            self.errorMessage(true);
-        }
+         }
     };
 
-    // This uses firebase to keep track of users online at the moment
-    // starts off with 0 and adds 1
-    // TODO UNDERSTAND more
-    self.usersOnline = ko.observable(0);
 
+    // This uses firebase to keep track of users online at the moment
+    // starts off with 0 and adds 1 for each online user
+    // TODO UNDERSTAND more about firebase
+    self.usersOnline = ko.observable(0);
     self.getUsers = function() {
         // make a new list into firebase
         var listRef = new Firebase("https://blinding-fire-8036.firebaseio.com/presence/");
@@ -354,26 +361,36 @@ var ViewModel = function() {
                 userRef.onDisconnect().remove();
             }
         });
-
         // Number of online users is the number of objects in the presence list.
         listRef.on("value", function(snap) {
             self.usersOnline(snap.numChildren());
         });
     };
+
     self.getUsers();
-
+    self.refreshPhotos();
+    self.getWeather();
 };
-// give the info to the html
-ko.applyBindings(ViewModel());
+
+// initial call after google maps gets started
+var vm;
+function startAll() {
+    initMap();
+    vm = new ViewModel();
+    ko.applyBindings(vm);
+    makeInfoWindow();
+}
 
 
- /**
+/**
  * @constructor
  * makes one google maps InfoWindow
  * gets shown with marker specific info when a marker is clicked.
  */
+
 var infoWindow;
 var makeInfoWindow = function() {
+
     infoWindow = new google.maps.InfoWindow({
         maxWidth: 150
     });
@@ -382,25 +399,33 @@ var makeInfoWindow = function() {
      * that opens the infoWindow when clicked
      * data inputed is the location object
      */
-    locationsToUse.forEach(function(place) {
-        google.maps.event.addListener(place.marker, 'click', function(loc) {
+    vm.locationsToUse().forEach(function(place) {
+        google.maps.event.addListener(place.marker, 'click', function() {
             return function() {
-                infoWindow.setContent('<h4>'+ loc.name + '</h4> <p>' + loc.description + '</p>');
-                infoWindow.open(map, this);
-                photoSearch = loc.name;
-                self.displayMessage(true);
-                refreshPhotos();
+                photoSearch = place.name;
                 place.marker.setMap(null);
-                place.marker.setAnimation(google.maps.Animation.DROP);
+                place.marker.setAnimation(google.maps.Animation.BOUNCE);
+                setTimeout(function() {
+                    place.marker.setAnimation(null);
+                }, 1850);
                 place.marker.setMap(map);
                 map.setCenter(place.marker.getPosition());
+                vm.refreshMessage(true);
+                vm.refreshPhotos();
+                infoWindow.setContent('<h4>'+ place.name + '</h4> <p>' + place.description +  '<br><img  class="mini-img" alt="mini photo of place" src="'+ vm.photo()  +'">');
+                // TODO PROBLEM I tried here to  open one of the images from the flickr api,
+                // into the infowindow but I didnt manage ! Problem is it takes a little while
+                // for flickr to load and then the image from the previous search gets loaded.
+                // i also tried this: could this work somehow (i also tried the runafter) - got a bit lost
+                // <!-- ko if: photo --> <img class="mini-img" alt="mini photo of place" data-bind=" attr: { src: photo() }"> <!-- /ko --></p>
+                // help!
+                infoWindow.open(map, this);
                 // TODO PROBLEM! infoWindow on top of everything, tried different ways to set zIndex, did not work.
                 // TODO MAYBE move to the right if under locations list (how?)
             };
         }(place));
     });
 };
-makeInfoWindow();
 
 
 // thankyous go to:
@@ -410,3 +435,5 @@ makeInfoWindow();
 // http://jsfiddle.net/mythical/XJEzc/
 // http://stackoverflow.com/a/23981970
 // http://stackoverflow.com/a/15982583
+// http://jsfiddle.net/FgVxY/4/
+// and my reviewer, Ryan Vrba!
